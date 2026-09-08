@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pytest
+httpx
+sqlalchemy
+psycopg2-binary
+python-jose[cryptography]
+argon2-cffi  

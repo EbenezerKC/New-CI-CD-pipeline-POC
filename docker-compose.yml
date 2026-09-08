@@ -1,0 +1,32 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: glynac-postgres
+    environment:
+      POSTGRES_USER: glynac
+      POSTGRES_PASSWORD: glynac_password
+      POSTGRES_DB: glynac_auth
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glynac -d glynac_auth"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build: .
+    container_name: glynac-auth
+    environment:
+      DATABASE_URL: postgresql://glynac:glynac_password@postgres:5432/glynac_auth
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data: 
