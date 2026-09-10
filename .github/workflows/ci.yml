@@ -22,16 +22,14 @@ jobs:
           echo "Runner: $RUNNER_NAME"
           echo "OS: $RUNNER_OS"
           docker --version
-          python3 --version
 
-      - name: Install dependencies
+      - name: Run tests in Python 3.12
         run: |
-          python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run tests
-        run: |
-          pytest -v
+          docker run --rm \
+            -v "$PWD:/app" \
+            -w /app \
+            python:3.12-slim \
+            bash -c "pip install --no-cache-dir -r requirements.txt && pytest -v"
 
       - name: Build Docker image
         run: |
