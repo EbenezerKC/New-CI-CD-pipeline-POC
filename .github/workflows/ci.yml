@@ -22,14 +22,27 @@ jobs:
           echo "Runner: $RUNNER_NAME"
           echo "OS: $RUNNER_OS"
           docker --version
+          docker compose version
 
-      - name: Run tests in Python 3.12
+      - name: Start PostgreSQL
         run: |
-          docker run --rm \
-            -v "$PWD:/app" \
-            -w /app \
-            python:3.12-slim \
-            bash -c "pip install --no-cache-dir -r requirements.txt && pytest -v"
+          docker compose up -d postgres
+
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL..."
+          until docker compose exec -T postgres pg_isready -U glynac -d glynac_auth; do
+            sleep 2
+          done
+          echo "PostgreSQL is ready."
+
+      - name: Build auth service
+        run: |
+          docker compose build auth-service
+
+      - name: Run tests
+        run: |
+          docker compose run --rm auth-service pytest -v
 
       - name: Build Docker image
         run: |
@@ -38,3 +51,8 @@ jobs:
       - name: Verify Docker image
         run: |
           docker images glynac-auth
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down
