@@ -42,7 +42,10 @@ jobs:
 
       - name: Run tests
         run: |
-          docker compose run --rm auth-service pytest -v
+          docker compose run --rm \
+          -v "$PWD:/app" \
+          auth-service \
+          pytest -v
 
       - name: Build Docker image
         run: |
@@ -52,7 +55,8 @@ jobs:
         run: |
           docker images glynac-auth
 
-      - name: Cleanup
-        if: always()
-        run: |
-          docker compose down
+       - name: Cleanup
+         if: always()
+         run: |
+          docker compose down -v
+
